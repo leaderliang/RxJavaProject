@@ -30,7 +30,7 @@ public class RxUsage {
 
     private StringBuffer mRxOperatorsText;
 
-    private final String TAG = getClass().getSimpleName();
+    private static final String TAG = RxUsage.class.getSimpleName();
 
     {
         mRxOperatorsText = new StringBuffer();
@@ -48,6 +48,7 @@ public class RxUsage {
                 emitter.onNext(1);
                 emitter.onNext(2);
                 emitter.onNext(3);
+                emitter.onComplete();
                 emitter.onComplete();
 //                emitter.onError(new NullPointerException());
             }
@@ -80,7 +81,7 @@ public class RxUsage {
      * <p>
      * 注意：只有当上游和下游建立连接之后, 上游才会开始发送事件. 也就是调用了subscribe() 方法之后才开始发送事件.
      */
-    private void commonUsage() {
+    public static void commonUsage() {
         // 创建一个上游 Observable
         Observable<Integer> mObservable = Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
@@ -89,7 +90,9 @@ public class RxUsage {
                 emitter.onNext(2);
                 emitter.onNext(3);
                 emitter.onComplete();
-                emitter.onError(new NullPointerException());
+//                emitter.onComplete();
+//                emitter.onError(new NullPointerException());
+//                emitter.onError(new IllegalAccessError());
             }
         });
 
@@ -148,6 +151,11 @@ public class RxUsage {
                     public void accept(@NonNull String s) throws Exception {
                         Log.e(TAG, "flatMap : accept : " + s + "\n");
                         mRxOperatorsText.append("flatMap : accept : " + s + "\n");
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+
                     }
                 });
     }

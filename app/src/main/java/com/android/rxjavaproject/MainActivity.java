@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-/*      RxUsage.commonUsage();
-        RxUsage.commonUsageForChain();
+      RxUsage.commonUsage();
+/*        RxUsage.commonUsageForChain();
         RxUsage.testCreate();
         RxUsage.testMap();
         RxUsage.testZip();
