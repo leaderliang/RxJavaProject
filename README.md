@@ -1,7 +1,7 @@
 # RxJava Project
 本文并非原创，通过以下博主综合学习总结而得，以便供自己方便学习，在此感谢各位前辈，并在下面注明出处。
 
-## ObservableEmitter 和 Disposable 解释
+## ObservableEmitter、Disposable、subscribe() 解释
 ### ObservableEmitter 
 Emitter 是发射器的意思，那就很好猜了，这个就是用来发出事件的，它可以发出三种类型的事件，通过调用 emitter 的 onNext(T value)、onComplete() 和 onError(Throwable error) 就可以分别发出 next 事件、complete 事件和 error 事件。
 
@@ -20,7 +20,7 @@ Emitter 是发射器的意思，那就很好猜了，这个就是用来发出事
 
 > 注意: 调用 dispose() 并不会导致上游不再继续发送事件, 上游会继续发送剩余的事件.
 
-### subscribe ()
+### subscribe()
 subscribe 有好几个重载方法
 
 ```
