@@ -1,5 +1,5 @@
 # RxJava Project
-本文并非原创，通过以下博主综合学习总结而得，以便供自己方便学习，在此感谢各位前辈，并在下面注明出处。
+本文并非原创，通过各位博主综合学习总结而得，以便供自己方便学习，在此感谢各位前辈，并在下面注明出处。
 
 ## ObservableEmitter、Disposable、subscribe() 解释
 ### ObservableEmitter 
@@ -250,7 +250,7 @@ implementation 'com.alibaba:fastjson:1.2.56'
 
 
 ## 说明
-本文并非原创，通过以下博主综合学习总结而得，以便供自己方便学习，在此感谢各位前辈，并在下面注明出处。
+本文并非原创，通过各位博主综合学习总结而得，以便供自己方便学习，在此感谢各位前辈，并在下面注明出处。
 - [https://www.jianshu.com/u/c50b715ccaeb](https://www.jianshu.com/u/c50b715ccaeb)
 
 
