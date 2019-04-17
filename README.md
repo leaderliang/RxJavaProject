@@ -242,7 +242,7 @@ implementation 'com.alibaba:fastjson:1.2.56'
 
 都统一在 MainActivity 中进行调用。
 
-看似很完美, 但我们忽略了一点, 如果在请求的过程中 Activity 已经退出了, 这个时候如果回到主线程去更新 UI, 那么APP肯定就崩溃了, 可以往上翻 [Disposable](#Gisposable) , 说它是个开关, 调用它的dispose()方法时就会切断水管, 使得下游收不到事件, 既然收不到事件, 那么也就不会再去更新UI了. 因此我们可以在 Activity 中将这个 Disposable 保存起来, 当 Activity退出时, 切断它即可.
+看似很完美, 但我们忽略了一点, 如果在请求的过程中 Activity 已经退出了, 这个时候如果回到主线程去更新 UI, 那么APP肯定就崩溃了, 可以往上翻 [Disposable](#Disposable) , 说它是个开关, 调用它的dispose()方法时就会切断水管, 使得下游收不到事件, 既然收不到事件, 那么也就不会再去更新UI了. 因此我们可以在 Activity 中将这个 Disposable 保存起来, 当 Activity退出时, 切断它即可.
 那如果有多个 Disposable 该怎么办呢, RxJava 中已经内置了一个容器 `CompositeDisposable`, 每当我们得到一个 `Disposable` 时就调用 `CompositeDisposable.add()` 将它添加到容器中, 在退出的时候, 调用 `CompositeDisposable.clear()` 即可切断所有的水管.
 
 ## RxJava 中强大的操作符
