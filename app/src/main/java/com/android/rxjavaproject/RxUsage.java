@@ -20,7 +20,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * TODO
+ * TODO RxJava 的常见用法示例
  *
  * @author dev.liang <a href="mailto:dev.liang@outlook.com">Contact me.</a>
  * @version 1.0
@@ -120,6 +120,92 @@ public class RxUsage {
         };
         mObservable.subscribe(mObserver);
 
+    }
+
+
+    /**
+     * 子线程处理耗时操作
+     * 主线程更新 UI
+     */
+    public static void testPrintThreadName(){
+        Observable<Integer> observable = Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
+                Log.e(TAG, "Observable thread is : " + Thread.currentThread().getName());
+                Log.e(TAG, "emit 1");
+                emitter.onNext(1);
+            }
+        });
+
+        Consumer<Integer> consumer = new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                Log.e(TAG, "Observer thread is :" + Thread.currentThread().getName());
+                Log.e(TAG, "onNext: " + integer);
+            }
+        };
+
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(consumer);
+    }
+
+    /**
+     * 多次调用 subscribeOn(Schedulers.newThread()) 、 .observeOn(AndroidSchedulers.mainThread()) 进行变换
+     * 打印 log
+     *
+     * 子线程处理耗时操作
+     * 主线程更新 UI
+     *
+     */
+    public static void testPrintThreadNameMoreChange(){
+        Observable<Integer> observable = Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
+                Log.e(TAG, "Observable thread is : " + Thread.currentThread().getName());
+                Log.e(TAG, "emit 1");
+                emitter.onNext(1);
+            }
+        });
+
+        Consumer<Integer> consumer = new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) throws Exception {
+                Log.e(TAG, "Observer thread is :" + Thread.currentThread().getName());
+                Log.e(TAG, "onNext: " + integer);
+            }
+        };
+
+        /*这段代码中指定了两次上游发送事件的线程, 分别是newThread和IO线程, 下游也指定了两次线程,分别是main和IO线程*/
+        observable.subscribeOn(Schedulers.newThread())
+                .doOnNext(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "After subscribeOn(newThread), current thread is: " + Thread.currentThread().getName());
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .doOnNext(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "After subscribeOn(io), current thread is: " + Thread.currentThread().getName());
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "After observeOn(mainThread), current thread is: " + Thread.currentThread().getName());
+                    }
+                })
+                .observeOn(Schedulers.io())
+                .doOnNext(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+                        Log.e(TAG, "After observeOn(io), current thread is: " + Thread.currentThread().getName());
+                    }
+                })
+                .subscribe(consumer);
     }
 
 
