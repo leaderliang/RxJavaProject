@@ -1,5 +1,6 @@
 # RxJava Project
 本文并非原创，通过各位博主综合学习总结而得，以便供自己方便学习，在此感谢各位前辈，并在下面注明出处。
+更多 RxJava 学习笔记分享，可在我的个人博客查看，[dev.liang's blog](https://leaderliang.github.io/categories/android/rxjava/)
 
 ## ObservableEmitter、Disposable、subscribe() 解释
 ### ObservableEmitter 
