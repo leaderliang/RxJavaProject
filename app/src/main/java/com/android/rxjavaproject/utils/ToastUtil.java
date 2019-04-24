@@ -22,7 +22,7 @@ public class ToastUtil {
     public static void show(Context context, String text) {
         if (toast == null) {
             // 这个地方第二个参数需要为null
-            toast = Toast.makeText(context, null, Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context, text, Toast.LENGTH_LONG);
             toast.setText(text);
         } else {
             toast.setText(text);
@@ -32,7 +32,7 @@ public class ToastUtil {
 
     public static void show(Context context, @StringRes int resId) {
         if (toast == null) {
-            toast = Toast.makeText(context, null, Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context, resId, Toast.LENGTH_LONG);
             toast.setText(resId);
         } else {
             toast.setText(resId);
@@ -46,7 +46,7 @@ public class ToastUtil {
      */
     public static void singleCenter(Context context, @StringRes int msg) {
         if (toast == null) {
-            toast = Toast.makeText(context, null, Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
             toast.setText(msg);
         } else {
             toast.setText(msg);
@@ -60,7 +60,7 @@ public class ToastUtil {
      */
     public static void singleCenter(Context context, String msg) {
         if (toast == null) {
-            toast = Toast.makeText(context, null, Toast.LENGTH_SHORT);
+            toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
             toast.setText(msg);
         } else {
             toast.setText(msg);

@@ -4,6 +4,9 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.rxjavaproject.retrofit.GithubService;
@@ -15,6 +18,7 @@ import com.google.gson.JsonObject;
 
 import org.reactivestreams.Subscriber;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,46 +40,86 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * 各个操作符执行的结果通过 log 日志来进行查看
+ *
+ * 各个操作符的简单使用及执行的结果通过 log 日志来进行查看
+ *
  * 操作符
- * create、map、zip、Concat、flatMap、concatMap
+ *  create：
+ *  map：
+ *  zip：
+ *  Concat：
+ *  flatMap:
+ *  concatMap:
  *
  * @author liang
  */
 public class MainActivity extends AppCompatActivity {
+
     private final String TAG = MainActivity.class.getSimpleName();
+    private boolean isDefaultAddress;
+
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        RxUsage.testPrintThreadNameMoreChange();
-/*      RxUsage.commonUsage();
-        RxUsage.commonUsageForChain();
-        RxUsage.testPrintThreadName();
-        RxUsage.testPrintThreadNameMoreChange();
-        RxUsage.testCreate();
-        RxUsage.testMap();
+
+
         RxUsage.testZip();
+
+
+
+/*      RxUsage.commonUsage();
+
+        RxUsage.commonUsageForChain();
+
+        RxUsage.testPrintThreadName();
+
+        RxUsage.testPrintThreadNameMoreChange();
+
+        RxUsage.testCreate();
+
+        RxUsage.testMap();
+
+        RxUsage.testZip();
+
         RxUsage.testConcat();
+
         RxUsage.testFlatMap();
-        RxUsage.testConcatMap();*/
 
-
+        RxUsage.testConcatMap();
 
         getRepos();
+        */
+
 
 
     }
 
     /**
      * Retrofit 中使用 RxJava 线程调度
+     *
+     * repos.enqueue 异步请求
+     *
+     * call.execute(); 代码会阻塞线程，因此你不能在安卓的主线程中调用，不然会面临 NetworkOnMainThreadException。如果你想调用execute方法，请在开启子线程执行。
+     *
+     * repos.cancel();
      */
     private void getRepos() {
         GithubService mGithubService = RetrofitClient.getInstance().create(GithubService.class);
         /* 传统方式调用*/
         Call<List<Repo>> repos = mGithubService.getUserRepos_();
+
+        /*同步请求 报错*/
+        /*try {
+            Response<List<Repo>> repo  = repos.execute();
+            Log.e(TAG, repo.code() + " " + new Gson().toJson(repo.body()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
         repos.enqueue(new Callback<List<Repo>>() {
             @Override
             public void onResponse(Call<List<Repo>> call, Response<List<Repo>> response) {
@@ -91,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         /* Rx 方式调用*/
         mGithubService.getUserRepos()
                 .subscribeOn(Schedulers.newThread())
@@ -99,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void accept(List<Repo> repos) throws Exception {
                         ToastUtil.show(MainActivity.this, " " + new Gson().toJson(repos));
+//                        Toast.makeText(MainActivity.this, new Gson().toJson(repos), Toast.LENGTH_SHORT).show();
                     }
                 });
 //                .subscribe(new Observer<List<Repo>>() {

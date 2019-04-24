@@ -1,7 +1,12 @@
 package com.android.rxjavaproject;
 
+import android.content.Context;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.android.rxjavaproject.utils.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,13 +33,10 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class RxUsage {
 
-    private StringBuffer mRxOperatorsText;
+    private static StringBuffer mRxOperatorsText = new StringBuffer();
 
     private static final String TAG = RxUsage.class.getSimpleName();
 
-    {
-        mRxOperatorsText = new StringBuffer();
-    }
 
     /**
      * RxJava 的链式操作
@@ -212,7 +214,7 @@ public class RxUsage {
     /**
      * concatMap 与 FlatMap 的唯一区别就是 concatMap 保证了顺序
      */
-    private void testConcatMap() {
+    public static void testConcatMap() {
         Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Integer> e) throws Exception {
@@ -230,13 +232,14 @@ public class RxUsage {
                 int delayTime = (int) (1 + Math.random() * 10);
                 return Observable.fromIterable(list).delay(delayTime, TimeUnit.MILLISECONDS);
             }
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
+        })
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(@NonNull String s) throws Exception {
-                        Log.e(TAG, "flatMap : accept : " + s + "\n");
-                        mRxOperatorsText.append("flatMap : accept : " + s + "\n");
+                        Log.e(TAG, "concatMap : accept : " + s + "\n");
+                        mRxOperatorsText.append("concatMap : accept : " + s + "\n");
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -244,14 +247,17 @@ public class RxUsage {
 
                     }
                 });
+
     }
+
 
     /**
      * 它可以把一个发射器 Observable 通过某种方法转换为多个 Observables，
      * 然后再把这些分散的 Observables装进一个单一的发射器 Observable。
-     * 但有个需要注意的是，flatMap 并不能保证事件的顺序，如果需要保证，需要用到我们下面要讲的 ConcatMap。
+     * 但有个需要注意的是，flatMap 并不能保证事件的顺序，
+     * 如果需要保证，需要用到我们下面要讲的 ConcatMap。
      */
-    private void testFlatMap() {
+    public static void testFlatMap() {
         Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
             public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
@@ -267,15 +273,22 @@ public class RxUsage {
                     list.add("I am value " + integer);
                 }
                 int delayTime = (int) (1 + Math.random() * 10);
-                return Observable.fromIterable(list).delay(delayTime, TimeUnit.SECONDS);
+                return Observable.fromIterable(list).delay(10, TimeUnit.MILLISECONDS);
             }
-        }).subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
+        })
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(String s) throws Exception {
-                        mRxOperatorsText.append("flatMap : accept : " + s + "\n");
+                        // 这个打印出来是不完整的，偶尔会丢失数据！！！
+                        // 有人说 Android8.0和Android9.0 兼容性有问题了，使用 flatmap，下游无法接收到全部的消息
+                        // 还未验证
                         Log.e(TAG, "flatMap : accept : " + s + "\n");
+
+                        //这个打印出来是完整的，下游不会丢失数据
+//                        mRxOperatorsText.append("stringBuffer flatMap : accept : " + s + "\n");
+//                        Log.e(TAG, mRxOperatorsText.toString());
                     }
                 });
 
@@ -294,13 +307,93 @@ public class RxUsage {
         });
     }
 
+
+    public static void testZipp(){
+        Observable<Integer> observable1 = Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
+                Log.d(TAG, "emit 1");
+                emitter.onNext(1);
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit 2");
+                emitter.onNext(2);
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit 3");
+                emitter.onNext(3);
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit 4");
+                emitter.onNext(4);
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit 5");
+                emitter.onNext(5);
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit complete1");
+                emitter.onComplete();
+            }
+        }).subscribeOn(Schedulers.io());
+
+        Observable<String> observable2 = Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+                Log.d(TAG, "emit A");
+                emitter.onNext("A");
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit B");
+                emitter.onNext("B");
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit C");
+                emitter.onNext("C");
+                SystemClock.sleep(1000);
+
+                Log.d(TAG, "emit complete2");
+                emitter.onComplete();
+            }
+        }).subscribeOn(Schedulers.io());
+
+        Observable.zip(observable1, observable2, new BiFunction<Integer, String, String>() {
+            @Override
+            public String apply(Integer integer, String s) throws Exception {
+                return integer + s;
+            }
+        }).subscribe(new Observer<String>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe");
+            }
+
+            @Override
+            public void onNext(String value) {
+                Log.d(TAG, "onNext: " + value);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d(TAG, "onError");
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete");
+            }
+        });
+
+    }
+
+
     /**
      * zip 组合事件的过程就是分别从发射器 A 和发射器 B 各取出一个事件来组合，并且一个事件只能被使用一次，
      * 组合的顺序是严格按照事件发送的顺序来进行的，所以上面截图中，可以看到，1 永远是和 A 结合的，2 永远是和 B 结合的。
      * <p>
      * 最终接收器收到的事件数量是和发送器发送事件最少的那个发送器的发送事件数目相同, getStringObservable()发送器发的事件数目最少.
      */
-    private void testZip() {
+    public static void testZip() {
         Observable.zip(getIntegerObservable(), getStringObservable(), new BiFunction<Integer, String, String>() {
             @Override
             public String apply(@NonNull Integer integer, @NonNull String s) throws Exception {
@@ -316,58 +409,79 @@ public class RxUsage {
         });
     }
 
-    private Observable<String> getStringObservable() {
+    private static Observable<String> getStringObservable() {
         return Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
                 if (!e.isDisposed()) {
-                    e.onNext("A");
+                    Log.e(TAG, "getStringObservable --> String emit : A \n");
                     mRxOperatorsText.append("String emit : A \n");
-                    Log.e(TAG, "second request--> String emit : A \n");
-                    e.onNext("B");
+                    e.onNext("A");
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "getStringObservable --> String emit : B \n");
                     mRxOperatorsText.append("String emit : B \n");
-                    Log.e(TAG, "second request--> String emit : B \n");
-                    e.onNext("C");
+                    e.onNext("B");
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "getStringObservable --> String emit : C \n");
                     mRxOperatorsText.append("String emit : C \n");
-                    Log.e(TAG, "second request--> String emit : C \n");
+                    e.onNext("C");
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "onComplete getStringObservable");
+                    e.onComplete();
                 }
             }
-        });
+        }).subscribeOn(Schedulers.io());
     }
 
-    private Observable<Integer> getIntegerObservable() {
+    private static Observable<Integer> getIntegerObservable() {
         return Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Integer> e) throws Exception {
                 if (!e.isDisposed()) {
-                    e.onNext(1);
+
+                    Log.e(TAG, "getIntegerObservable --> Integer emit : 1 \n");
                     mRxOperatorsText.append("Integer emit : 1 \n");
-                    Log.e(TAG, "first request--> Integer emit : 1 \n");
-                    e.onNext(2);
+                    e.onNext(1);
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "getIntegerObservable --> Integer emit : 2 \n");
                     mRxOperatorsText.append("Integer emit : 2 \n");
-                    Log.e(TAG, "first request--> Integer emit : 2 \n");
-                    e.onNext(3);
+                    e.onNext(2);
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "getIntegerObservable --> Integer emit : 3 \n");
                     mRxOperatorsText.append("Integer emit : 3 \n");
-                    Log.e(TAG, "first request--> Integer emit : 3 \n");
-                    e.onNext(4);
+                    e.onNext(3);
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "getIntegerObservable --> Integer emit : 4 \n");
                     mRxOperatorsText.append("Integer emit : 4 \n");
-                    Log.e(TAG, "first request--> Integer emit : 4 \n");
-                    e.onNext(5);
+                    e.onNext(4);
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "getIntegerObservable --> Integer emit : 5 \n");
                     mRxOperatorsText.append("Integer emit : 5 \n");
-                    Log.e(TAG, "first request--> Integer emit : 5 \n");
+                    e.onNext(5);
+                    SystemClock.sleep(1000);
+
+                    Log.e(TAG, "onComplete getIntegerObservable");
+                    e.onComplete();
                 }
             }
-        });
+        }).subscribeOn(Schedulers.io());
     }
 
     /**
-     * Map 基本算是 RxJava 中一个最简单的操作符了,它的作用是对发射时间发送的每一个事件应用一个函数，
+     * Map 基本算是 RxJava 中一个最简单的操作符了, 它的作用是对发射时间发送的每一个事件应用一个函数，
      * 是的每一个事件都按照指定的函数去变化。
      * <p>
      * map 基本作用就是将一个 Observable 通过某种函数关系，转换为另一种 Observable，
      * 例子中就是把我们的 String 数据变成了 float 类型，查看 Log 日志
      */
-    private void testMap() {
+    public static void testMap() {
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(ObservableEmitter<String> emitter) throws Exception {

@@ -231,8 +231,7 @@ implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
 /*fastJson*/
 implementation 'com.alibaba:fastjson:1.2.56'
 ```
-具体操作可点击查看代码
-主要有这几个类
+具体操作可点击查看代码，主要有这几个类，另外使用了 https://api.github.com/ 接口：
 
 [GithubService.java ](https://github.com/leaderliang/RxJavaProject/blob/150273c7a6697bd8c08be8bacb24027397bd9336/app/src/main/java/com/android/rxjavaproject/retrofit/GithubService.java)
 
